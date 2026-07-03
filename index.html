@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>검토여신 접속</title>
+  <style>
+    body { font-family: 'Malgun Gothic', sans-serif; display: flex; align-items: center;
+           justify-content: center; min-height: 100vh; margin: 0; background: #f5f6f8; }
+    .box { text-align: center; padding: 32px 40px; background: #fff; border-radius: 12px;
+           box-shadow: 0 2px 12px rgba(0,0,0,.08); }
+    a { color: #0b62d6; word-break: break-all; }
+    .err { color: #c0392b; }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>검토여신 웹으로 이동 중...</h2>
+    <p id="msg">잠시만 기다려 주세요.</p>
+  </div>
+  <script>
+    // review_url.txt(오너 PC 기동 시 자동 갱신)를 읽어 현재 터널 주소로 이동.
+    // 고유 쿼리로 raw CDN 캐시를 우회해 항상 최신 URL 을 받는다.
+    (async () => {
+      const msg = document.getElementById("msg");
+      try {
+        const r = await fetch(
+          "https://raw.githubusercontent.com/sji861118-afk/review-pointer-/main/review_url.txt?t=" + Date.now()
+        );
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        const url = (await r.text()).trim();
+        if (!/^https:\/\//.test(url)) throw new Error("잘못된 주소: " + url);
+        msg.textContent = "이동하지 않으면 ";
+        const a = document.createElement("a");
+        a.href = url;
+        a.textContent = "여기";
+        msg.appendChild(a);
+        msg.appendChild(document.createTextNode("를 눌러 주세요."));
+        location.replace(url);
+      } catch (e) {
+        msg.className = "err";
+        msg.textContent = "현재 서버 주소를 가져오지 못했습니다. 서버(오너 PC)가 켜져 있는지 확인해 주세요. (" + e.message + ")";
+      }
+    })();
+  </script>
+</body>
+</html>
